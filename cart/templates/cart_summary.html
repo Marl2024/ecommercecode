@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+    {% if cart_products %}
+        <div class="container my-5">
+            {% for product in cart_products %}
+            <div class="card mb-3 shadow-sm" style="max-width: 840px;">
+                <div class="row g-0">
+                    <div class="col-md-6 d-flex align-items-stretch">
+                        <img src="{{ product.image.url }}" class="img-fluid rounded-start" 
+                             alt="{{ product.name }}" style="width: 100%; height: auto; object-fit: cover;">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body d-flex flex-column justify-content-between">
+                            <div>
+                                <h5 class="card-title" style="font-size: 1.5rem; color: #333;">{{ product.name }}</h5>
+                                <p class="card-text" style="color: #555;"><strong>ID:</strong> {{ product.id }}</p>
+                                <p class="card-text" style="color: #555;">{{ product.description }}</p>
+                                {% if product.is_sale %}
+                                    <p class="card-text">
+                                        <small class="text-muted" style="color: #888;">
+                                            <strike>${{ product.price }}</strike> ${{ product.sale_price }}
+                                        </small>
+                                    </p>
+                                {% else %}
+                                    <p class="card-text"><small class="text-muted" style="color: #888;">${{ product.price }}</small></p>
+                                {% endif %}
+                            </div>
+                            <form class="d-flex flex-column align-items-center" id="select{{ product.id }}">
+                                <h4 class="mb-3" style="color: #333;">Quantity</h4>
+                                <div class="counter-container" data-index="{{ product.id }}">
+                                    <button type="button" class="button" id="decrement">-</button>
+                                    {% for key, value in quantities.items %}
+                                        {% if key == product.id|slugify %}
+                                            <span class="value">{{ value }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <button type="button" class="button" id="increment">+</button>
+                                </div>
+                                <input type="hidden" id="quantity{{ product.id }}" name="quantity" value="0">
+                                <br>
+                                <button type="button" class="btn btn-danger delete-product" data-index="{{ product.id }}">
+                                    Remove
+                                </button>
+                                <br><br>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <h1 style="font-size: 2rem; color: #333;">Total: ${{ totals }}</h1>
+            <br><br>
+            <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+        </div>
+    {% else %}
+        <p style="color: #555;">There's Nothing In Your Cart!</p>
+    {% endif %}
+    <br><br><br>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+   <script>
+    $(document).ready(function() {
+        $('.counter-container').each(function() {
+            let count = parseInt($(this).find('.value').text()) || 0;
+            const valueDisplay = $(this).find('.value');
+            const incrementButton = $(this).find('#increment');
+            const decrementButton = $(this).find('#decrement');
+            const productId = $(this).data('index');
+
+            function updateCart(productId, qty) {
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'cart_update' %}",
+                    data: {
+                        product_id: productId,
+                        product_qty: qty,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: 'post'
+                    },
+                    success: function(json) {
+                        console.log(json);
+                        // Reload the page after updating the cart
+                        location.reload();
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.error(errmsg);
+                    }
+                });
+            }
+
+            incrementButton.on('click', function() {
+                count++;
+                valueDisplay.text(count);
+                $('#quantity' + productId).val(count);
+                updateCart(productId, count);
+                location.reload();
+            });
+
+            decrementButton.on('click', function() {
+                if (count > 1) {
+                    count--;
+                    valueDisplay.text(count);
+                    $('#quantity' + productId).val(count);
+                    updateCart(productId, count);
+                    location.reload();
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-product', function(e) {
+            e.preventDefault();
+            const productId = $(this).data('index');
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'cart_delete' %}",
+                data: {
+                    product_id: productId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                    action: 'post'
+                },
+                success: function(json) {
+                    console.log('Response:', json);
+                    location.reload();
+                },
+                error: function(xhr, errmsg, err) {
+                    console.error(errmsg);
+                }
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}
