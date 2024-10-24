@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Shop Homepage - Ecommerce</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico'%}" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+       
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="#!">ShopNow</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'home'%}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
+
+                       {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'logout' %}">Logout</a></li>
+                        {% else %}
+                      
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="{% url 'login' %}">Login</a></li>
+                          {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Products</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="#!">{{ product.category }}</a></li>
+
+                                
+                            </ul>
+                        </li>
+                    </ul>
+                    <div style="position: relative;">
+                        <input type="text" id="search" placeholder="Search items" class="form-control" />
+                        <ul id="results"></ul>
+                        <div class="selected-items" id="selected-items"></div>
+                    </div>
+    <ul id="results"></ul>
+                    <form class="d-flex">
+                        <a href="{% url 'cart_summary' %}" class="btn btn-outline-dark" type="submit"><i class="bi-cart-fill me-1" ></i>
+                            Cart
+                            <span class="badge bg-dark text-white ms-1 rounded-pill" id="cart_quatity">{{ cart|length }}</span></a>
+                       
+                    </form>
+                </div>
+            </div>
+        </nav>
+        <!-- Header-->
+   
+         {% block content %}
+         
+         {% endblock %}
+         
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            $(document).ready(function() {
+    $('#search').on('input', function() {
+        const query = $(this).val();
+        if (query.length > 0) {
+            $.ajax({
+                url: '{% url "search_items" %}',
+                data: { 'q': query },
+                dataType: 'json',
+                success: function(data) {
+                    $('#results').empty().show();
+                    if (data.length > 0) {
+                        data.forEach(function(item) {
+                            // Construct the URL for product detail page
+                            const productUrl = "{% url 'product' 0 %}".replace(/0$/, item.id);
+                            $('#results').append('<li><a href="' + productUrl + '">' + item.name + '</a></li>');
+                        });
+                    } else {
+                        $('#results').append('<li>No results found</li>');
+                    }
+                }
+            });
+        } else {
+            $('#results').empty().hide();
+        }
+    });
+});
+                
+    
+                // Hide results when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('#search').length) {
+                        $('#results').hide();
+                    }
+                });
+            });
+        </script>
+</html>

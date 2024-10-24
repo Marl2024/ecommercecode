@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container my-5 d-flex justify-content-center">
+    <div class="card mb-3 shadow-sm" style="width: 100%; max-width: 1000px; height: 700px;"> <!-- Adjusted max-width -->
+        <div class="row g-0 h-100">
+            <div class="col-md-7">
+                <img src="{{ product.image.url }}" class="img-fluid rounded-start" 
+                     alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;"> <!-- Use auto for height -->
+            </div>
+            <div class="col-md-5 d-flex flex-column"> <!-- Use flex column for vertical alignment -->
+                <div class="card-body flex-grow-1"> <!-- Allow card-body to grow -->
+                    <h4>Product ID: {{ product.id }}</h4>
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    {% if product.is_sale %}
+                    <p class="card-text">
+                        <small class="text-body-secondary"><strike>${{ product.price }}</strike> ${{ product.sale_price }}</small>
+                    </p>
+                    {% else %}
+                    <p class="card-text"><small>${{ product.price }}</small></p>
+                    {% endif %}
+                </div>
+                <div class="mt-auto" > <!-- This pushes the form to the bottom -->
+                    <form class="d-flex" id="add-to-cart-form">
+                        <div class="counter-container me-3 ">
+                            <button type="button" class="button" id="decrement">-</button>
+                            <span class="value" id="value">0</span>
+                            <button type="button" class="button" id="increment">+</button>
+                        </div>
+                        <input type="hidden" id="quantity" name="quantity" value="0"> <!-- Hidden input for quantity -->       
+                        <button type="submit" class="btn btn-secondary" value="{{ product.id }}" id="add-cart">Add to Cart</button>
+                    </form>
+                    <br>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+    let count = 0;
+
+    const valueDisplay = document.getElementById('value');
+    const incrementButton = document.getElementById('increment');
+    const decrementButton = document.getElementById('decrement');
+    const quantityInput = document.getElementById('quantity');
+
+    incrementButton.onclick = function() {
+        count++;
+        valueDisplay.textContent = count;
+        quantityInput.value = count;  // Update hidden input
+    };
+
+    decrementButton.onclick = function() {
+        if (count > 0) {
+            count--;
+            valueDisplay.textContent = count;
+            quantityInput.value = count;  // Update hidden input
+        }
+    };
+
+    $(document).on('click', '#add-cart', function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'cart_add' %}",
+            data: {
+                product_id: $(this).val(),
+                product_qty: valueDisplay.textContent,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'post'
+            },
+            success: function(json) {
+                console.log(json);
+                // Refresh the page after adding to cart
+                location.reload();
+            },
+            error: function(xhr, errmsg, err) {
+                console.error(errmsg);
+            }
+        });
+    });
+</script>
+{% endblock %}
