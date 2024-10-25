@@ -1,81 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Your Shopping Cart</h1>
-    {% if cart_products %}
-        {% for product in cart_products %}
-            <div class="container my-5">
-                <div class="card mb-3 shadow-sm" style="max-width: 540px;">
-                    <div class="row g-0">
-                        <div class="col-md-4">
-                            <img src="{{ product.image.url }}" class="img-fluid rounded-start" 
-                                 alt="{{ product.name }}" style="height: 150px; object-fit: cover;">
-                        </div>
-                        <div class="col-md-8">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ product.name }}</h5>
-                                {% if product.is_sale %}
-                                    <p class="card-text">Price: ${{ product.sale_price }}</p>
-                                {% else %}
-                                    <p class="card-text">Price: ${{ product.price }}</p>
-                                {% endif %}
-                                
-                                {% for key, value in quantities.items %}
-                                    {% if key == product.id|slugify %}
-                                        <p class="value">Items: {{ value }}</p>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        <h1>Total: ${{ totals }}</h1>
-    {% else %}
-        <p>Your cart is empty.</p>
-<br><br>
-
-        
-    {% endif %}
-
-
-
-
-    <div class="card">
-        <div class="card-header">
-            Enter Shipping Information
+    
+    <div class="container my-5">
+        <div class="row">
+          
         </div>
-        <div class="card-body">
-        
-            <form method="post" class="container mt-4">
-                {% csrf_token %}
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Shipping Information</h4>
-                    </div>
-                    <div class="card-body">
-                        {{ shipping_form.as_p }}
-                    </div>
-                </div>
-            
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h4>Billing Information</h4>
-                    </div>
-                    <div class="card-body">
-                        {{ billing_form.as_p }}
-                    </div>
-                </div>
-            
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>
-      </div>
-      <br><br>
-
-     
+    </div>
 {% endblock %}

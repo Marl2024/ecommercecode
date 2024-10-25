@@ -24,9 +24,11 @@ class ShippingAddress(models.Model):
 class Order (models.Model):
     full_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
-    billing_address = models.TextField(max_length=1000)
+    order_shipping_address = models.TextField(max_length=1000)
     amount_paid = models.DecimalField(max_digits=7, decimal_places=2)
     date_ordered = models.DateTimeField(auto_now_add=True)
+    shipped = models.BooleanField(default=False)
+    date_shipped = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f'Order - {str(self.id)}'

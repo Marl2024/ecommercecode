@@ -10,6 +10,14 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 
+def order_item(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        orders = Order.objects.filter()
+
+        return render(request, 'payment/order_item.html',{'orders':orders})
+    else: 
+        return redirect('home')
+
 
 
 def process_order(request):
